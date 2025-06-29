@@ -8,24 +8,6 @@ services:
         cap_drop:
             - ALL
         privileged: true
-        # command: >
-        #     bash -c "
-        #         arp -s 192.168.70.160 02:42:c0:a8:49:a0 -i eth0 &&
-        #         iptables -t mangle -A INPUT -j TEE --gateway 192.168.70.160 &&
-        #         iptables -t mangle -A OUTPUT -j TEE --gateway 192.168.70.160 &&
-        #         iptables -t mangle -L -v -n 
-        #         exec /opt/oai-gnb/bin/entrypoint.sh /opt/oai-gnb/bin/nr-softmodem
-        #     "
-        # command: >
-        #     bash -c "
-        #         arp -s 192.168.70.160 02:42:c0:a8:49:a0 -i eth0 &&
-        #         iptables -t mangle -A OUTPUT ! -d 192.168.72.100 -j TEE --gateway 192.168.70.160 &&
-        #         iptables -t mangle -A INPUT ! -s 192.168.72.100 -j TEE --gateway 192.168.70.160 &&
-        #         iptables -t mangle -L -v -n &&
-        #         exec /opt/oai-gnb/bin/entrypoint.sh /opt/oai-gnb/bin/nr-softmodem
-        #     "
-
-        #       python3 /opt/oai-gnb/cu-agent/script-fw/fw_rules.py &
         command: >
             bash -c "
                 iptables -I OUTPUT -p udp --dport 2152 -j NFQUEUE --queue-num 1
@@ -49,13 +31,12 @@ services:
                 ipv4_address: 192.168.73.150
         volumes:
             - ./ran-conf/rfsim.cu.conf:/opt/oai-gnb/etc/gnb.conf
-            - /home/labuser/CRW25/cu-agent:/opt/oai-gnb/cu-agent
+            - ./cu-agent:/opt/oai-gnb/cu-agent
         healthcheck:
             test: /bin/bash -c "pgrep nr-softmodem"
             interval: 10s
             timeout: 5s
             retries: 5
-
     oai-du:
         image: jamsier/oai-gnb:CRW25
         container_name: rfsim5g-oai-du
@@ -84,7 +65,7 @@ services:
             retries: 5
 
     oai-nr-ue:
-        image: oai-nr-ue:latest
+        image: jamsier/oai-nr-ue:CRW25
         container_name: rfsim5g-oai-nr-ue
         cap_drop:
             - ALL
@@ -109,7 +90,7 @@ services:
             timeout: 5s
             retries: 5
     oai-nr-ue2:
-        image: oai-nr-ue:latest
+        image: jamsier/oai-nr-ue:CRW25
         container_name: rfsim5g-oai-nr-ue2
         cap_drop:
             - ALL
@@ -126,7 +107,6 @@ services:
             - /dev/net/tun:/dev/net/tun
         volumes:
             - ./ran-conf/nrue.conf:/opt/oai-nr-ue/etc/nr-ue.conf
-            # - ./lowRateDoS:/opt/oai-nr-ue/etc/lowRateDoS
             - ./normalUser:/opt/oai-nr-ue/etc/normalUser
         healthcheck:
             test: /bin/bash -c "pgrep nr-uesoftmodem"
@@ -134,7 +114,7 @@ services:
             timeout: 5s
             retries: 5
     oai-nr-ue3:
-        image: oai-nr-ue:latest
+        image: jamsier/oai-nr-ue:CRW25
         container_name: rfsim5g-oai-nr-ue3
         cap_drop:
             - ALL
@@ -151,7 +131,6 @@ services:
             - /dev/net/tun:/dev/net/tun
         volumes:
             - ./ran-conf/nrue.conf:/opt/oai-nr-ue/etc/nr-ue.conf
-            # - ./lowRateDoS:/opt/oai-nr-ue/etc/lowRateDoS
             - ./normalUser:/opt/oai-nr-ue/etc/normalUser
         healthcheck:
             test: /bin/bash -c "pgrep nr-uesoftmodem"
@@ -160,11 +139,9 @@ services:
             retries: 5
 
     traffic-capture:
-        image: traffic-capture:cfm
+        image: jamsier/traffic-capture:CRW25
         container_name: traffic-capture
         # command: bash -c "ip link set dev eth0 promisc on && ip addr flush dev eth0 && sleep infinity"
-        # command: bash -c "tcpdump -i any -w /app/pcap/traffic.pcap -B 4096"
-        # command: bash -c "ip link set dev eth0 promisc on && ip addr flush dev eth0 && python3 script/ue-recoder.py"
         command: bash -c "ip link set dev eth0 promisc on && ip addr flush dev eth0 && ./cu-agent/script/auto-run.sh"
         cap_drop:
             - ALL
@@ -174,14 +151,11 @@ services:
         networks:
             cu_net:
                 ipv4_address: 192.168.73.160
-            # e2_net:
-            #     ipv4_address: 192.168.72.160
         privileged: true
         volumes:
-            - /home/labuser/CRW25/cu-agent:/code/cu-agent
-
+            - ./cu-agent:/code/cu-agent
     e2-agent:
-        image: oai-flexric:dev
+        image: jamsier/flexric:kpm
         command: bash -c "./tmp/cu-agent/script/get_malicious_ip.sh & stdbuf -o0 /usr/local/flexric/emulator/agent/emu_agent_gnb"
         container_name: e2-agent
         networks:
@@ -191,10 +165,10 @@ services:
                 ipv4_address: 192.168.72.161
         volumes:
             - ../flexric.conf:/usr/local/etc/flexric/flexric.conf
-            - /home/labuser/CRW25/cu-agent:/tmp/cu-agent
-            - /home/labuser/CRW25/cu-agent/pcap/flow-data:/tmp/flow_data
-            - /home/labuser/CRW25/near-rt-ric/measurements_data:/tmp/measurements_data
-            - /home/labuser/CRW25/near-rt-ric/malicious_ip.json:/tmp/malicious_ip.json
+            - ./cu-agent:/tmp/cu-agent
+            - ./cu-agent/pcap/flow-data:/tmp/flow_data
+            - ./near-rt-ric/measurements_data:/tmp/measurements_data
+            - ./near-rt-ric/malicious_ip.json:/tmp/malicious_ip.json
 
 networks:
     public_net:

@@ -174,7 +174,7 @@ services:
 
     # FlexRIC components
     nearRT-RIC:
-        image: oai-flexric:dev
+        image: jamsier/flexric:kpm
         command: "stdbuf -o0 nearRT-RIC"
         container_name: nearRT-RIC
         networks:
@@ -182,7 +182,7 @@ services:
                 ipv4_address: 192.168.72.100
         volumes:
             - ./flexric.conf:/usr/local/etc/flexric/flexric.conf
-            - /home/labuser/CRW25/near-rt-ric/measurements_data:/tmp/measurements_data
+            - ./near-rt-ric/measurements_data:/tmp/measurements_data
 
     ## normal xApp
     # kpm-moni-xApp:
@@ -198,13 +198,13 @@ services:
     #             ipv4_address: 192.168.72.102
     #     volumes:
     #         - ./flexric.conf:/usr/local/etc/flexric/flexric.conf
-    #         - /home/labuser/CRW25/near-rt-ric/measurements_data:/tmp/measurements_data
+    #         - ./near-rt-ric/measurements_data:/tmp/measurements_data
 
     ## testing xApp
     kpm-moni-xApp:
         image: oai-flexric:dev
         command: "./tmp/get_indication.sh"
-        container_name: kpm-moni-xApp
+        container_name: jamsier/flexric:kpm
         depends_on:
             - nearRT-RIC
         networks:
@@ -212,12 +212,12 @@ services:
                 ipv4_address: 192.168.72.102
         volumes:
             - ./flexric.conf:/usr/local/etc/flexric/flexric.conf
-            - /home/labuser/CRW25/near-rt-ric/script/get_indication.sh:/tmp/get_indication.sh
-            - /home/labuser/CRW25/near-rt-ric/measurements_data:/tmp/measurements_data
-            - /home/labuser/CRW25/cu-agent/pcap/flow-data:/tmp/flow-data
+            - ./near-rt-ric/script/get_indication.sh:/tmp/get_indication.sh
+            - ./near-rt-ric/measurements_data:/tmp/measurements_data
+            - ./cu-agent/pcap/flow-data:/tmp/flow-data
 
     Sec-xApp:
-        image: oai-flexric:dev
+        image: jamsier/flexric:kpm
         # command: "sleep infinity"
         command: "./usr/local/flexric/xApp/python3/near-rt-ric/script/sec-auto-run.sh"
         container_name: secxapp
@@ -229,9 +229,9 @@ services:
                 ipv4_address: 192.168.72.101
         volumes:
             - ./flexric.conf:/usr/local/etc/flexric/flexric.conf
-            - /home/labuser/CRW25/near-rt-ric:/usr/local/flexric/xApp/python3/near-rt-ric
-            - /home/labuser/CRW25/near-rt-ric/measurements_data:/tmp/measurements_data
-            - /home/labuser/CRW25/cu-agent/ip_blacklist.json:/tmp/ip_blacklist.json
+            - ./near-rt-ric:/usr/local/flexric/xApp/python3/near-rt-ric
+            - ./near-rt-ric/measurements_data:/tmp/measurements_data
+            - ./cu-agent/ip_blacklist.json:/tmp/ip_blacklist.json
 
 networks:
     public_net:
