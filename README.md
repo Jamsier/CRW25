@@ -31,5 +31,9 @@
 
 
 ### Description
-1. `cu-agent/output.json`: Record the currently connected UE
-2. `near-rt-ric/malicious_ip.json`: Record suspicious IP addresses predicted by the model
+- In `./cu-agent`
+    1. `ue_list.json`: Records the currently connected UE dict. (Change at any time)
+    2. `ip_blacklist.json`: Records the latest prediction results from xApp, which is a list of suspicious IP addresses. (Change at any time)
+    3. `imsi_blacklist.json`: Records a set of suspicious IMSI lists, which are derived from `ue_list.json` and `ip_blacklist.json`. (Append only)
+- In `./near-rt-ric`
+    1. `malicious_ip.json`: Records suspicious IP addresses predicted by the model. (Change at each inferences)
