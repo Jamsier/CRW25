@@ -1,5 +1,6 @@
 # CRW-25
 
+### How to run
 1. clone the repo
     ```bash
     git clone https://github.com/Jamsier/CRW25.git
